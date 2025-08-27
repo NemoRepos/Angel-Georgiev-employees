@@ -1,0 +1,7 @@
+﻿.hidden-el {
+    position: absolute;
+    left: -9999px;
+}
+.output-table {
+    margin-top: 20px;
+}

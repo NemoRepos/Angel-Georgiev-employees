@@ -1,0 +1,16 @@
+﻿@model UploadedFileViewModel
+@{
+    ViewData["Title"] = "Task";
+}
+
+<div class="d-flex justify-content-center">
+    <form id="fileForm" method="post" enctype="multipart/form-data">
+        <div>
+            <label for="fileInput" class="btn btn-primary">Load File</label>
+            <input class="hidden-el" type="file" id="fileInput" name="CSVTable" class="form-control" required accept=".csv"/>
+            <span asp-validation-for="CSVTable" class="text-danger"></span>
+        </div>
+    </form>
+</div>
+<div class="output-table d-block justify-content-center" id="pairsTable">
+</div>

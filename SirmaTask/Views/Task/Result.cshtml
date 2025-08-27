@@ -1,0 +1,24 @@
+﻿//currently unused
+@model List<PairsViewModel>;
+@{
+    ViewData["Title"] = "Result";
+}
+<div class="list-group">
+    <table class="table-bordered">
+        <tr>
+            <th>Employee ID#1</th>
+            <th>Employee ID#2</th>
+            <th>Project ID</th>
+            <th>Days Worked</th>
+        </tr>
+        @foreach (PairsViewModel pair in Model)
+        {
+            <tr>
+                <td>@pair.Employee1ID</td>
+                <td>@pair.Employee2ID</td>
+                <td>@pair.ProjectID</td>
+                <td>@pair.DaysWorked</td>
+            </tr>
+        }
+    </table>
+</div>
