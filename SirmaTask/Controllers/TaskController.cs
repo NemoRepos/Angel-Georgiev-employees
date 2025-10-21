@@ -8,9 +8,11 @@ namespace SirmaTask.Controllers
     public class TaskController : Controller
     {
         private readonly IDateParseService _dateParser;
-        public TaskController(IDateParseService dateParseService)
+        private readonly IValidatorService _validatorService;
+        public TaskController(IDateParseService dateParseService, IValidatorService validatorService)
         {
             _dateParser = dateParseService;
+            _validatorService = validatorService;
         }
         public IActionResult Index()
         {
@@ -20,32 +22,13 @@ namespace SirmaTask.Controllers
         [HttpPost]
         public IActionResult ReadFile(UploadedFileViewModel csvFile)
         {
-            if (!ValidateCSV(csvFile))
+            if (!_validatorService.ValidateCSV(csvFile,this))
             {
                 return View("Index", csvFile);
             }
             List<EmployeeProjectViewModel> projects = Parse(csvFile.CSVTable);
             List<PairsViewModel> pairs = GetPairs(projects);
             return Json(pairs);
-        }
-
-        private bool ValidateCSV(UploadedFileViewModel fileModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return false;
-            }
-
-            if (fileModel.CSVTable == null || fileModel.CSVTable.Length == 0)
-            {
-                ModelState.AddModelError("CSVTable", "Invalid CSV file.");
-                return false;
-            }
-            else if (!fileModel.CSVTable.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
-            {
-                ModelState.AddModelError("CSVTable", "Only CSV files are allowed.");
-            }
-            return true;
         }
 
         private List<EmployeeProjectViewModel> Parse(IFormFile csv)

@@ -3,6 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<SirmaTask.Services.IDateParseService, SirmaTask.Services.DateParseService>();
+builder.Services.AddScoped<SirmaTask.Services.IValidatorService, SirmaTask.Services.ValidatorService>();
 
 var app = builder.Build();
 
