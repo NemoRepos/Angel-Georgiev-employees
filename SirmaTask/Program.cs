@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<SirmaTask.Services.IDateParseService, SirmaTask.Services.DateParseService>();
 builder.Services.AddScoped<SirmaTask.Services.IValidatorService, SirmaTask.Services.ValidatorService>();
+builder.Services.AddScoped<SirmaTask.Services.IQueryService, SirmaTask.Services.QueryService>();
 
 var app = builder.Build();
 

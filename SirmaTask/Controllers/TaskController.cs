@@ -7,12 +7,10 @@ namespace SirmaTask.Controllers
 {
     public class TaskController : Controller
     {
-        private readonly IDateParseService _dateParser;
-        private readonly IValidatorService _validatorService;
-        public TaskController(IDateParseService dateParseService, IValidatorService validatorService)
+        private readonly IQueryService _queryService;
+        public TaskController(IQueryService queryService)
         {
-            _dateParser = dateParseService;
-            _validatorService = validatorService;
+            _queryService = queryService;
         }
         public IActionResult Index()
         {
@@ -22,86 +20,7 @@ namespace SirmaTask.Controllers
         [HttpPost]
         public IActionResult ReadFile(UploadedFileViewModel csvFile)
         {
-            if (!_validatorService.ValidateCSV(csvFile,this))
-            {
-                return View("Index", csvFile);
-            }
-            List<EmployeeProjectViewModel> projects = Parse(csvFile.CSVTable);
-            List<PairsViewModel> pairs = GetPairs(projects);
-            return Json(pairs);
+            return _queryService.GetPairs(csvFile, this);
         }
-
-        private List<EmployeeProjectViewModel> Parse(IFormFile csv)
-        {
-            List<EmployeeProjectViewModel> projects = new List<EmployeeProjectViewModel>();
-
-            using (var reader = new StreamReader(csv.OpenReadStream()))
-            {
-                string line = reader.ReadLine(); // Skip header line
-                while ((line = reader.ReadLine()) != null)
-                {
-                    string[] values = line.Split(',');
-
-                    if(_dateParser.ParseDate(values[2]) == null)
-                        continue; // Invalid DateFrom, skip this record
-
-                    EmployeeProjectViewModel project = new EmployeeProjectViewModel()
-                    {
-                        EmployeeID = int.Parse(values[0]),
-                        ProjectID = int.Parse(values[1]),
-                        DateFrom = _dateParser.ParseNonNullDate(values[2]),
-                        DateTo = _dateParser.ParseDate(values[3]) ?? DateTime.Today
-                    };
-                    projects.Add(project);
-                }
-            }
-            return projects;
-        }
-        private List<PairsViewModel> GetPairs(List<EmployeeProjectViewModel> projects)
-        {
-            List<PairsViewModel> pairs = new List<PairsViewModel>();
-            //Group by project and days worked
-            var pairProjectOverlaps = projects
-            .GroupBy(r => r.ProjectID)
-            .SelectMany(g =>
-                from e1 in g
-                from e2 in g
-                where e1.EmployeeID < e2.EmployeeID
-                let overlapStart = e1.DateFrom > e2.DateFrom ? e1.DateFrom : e2.DateFrom
-                let overlapEnd = e1.DateTo < e2.DateTo ? e1.DateTo : e2.DateTo
-                let daysWorked = (overlapEnd - overlapStart).Value.TotalDays
-                where daysWorked > 0
-                select new PairsViewModel
-                {
-                    Employee1ID = e1.EmployeeID,
-                    Employee2ID = e2.EmployeeID,
-                    ProjectID = g.Key,
-                    DaysWorked = (int)daysWorked
-                });
-
-            // Pair with the most days worked together
-            var topPair = pairProjectOverlaps
-            .OrderByDescending(x => x.DaysWorked)
-            .Select(x => new { x.Employee1ID, x.Employee2ID })
-            .FirstOrDefault();
-
-            if (topPair != null)
-            {
-                // All projects for that pair
-                pairs = pairProjectOverlaps
-                .Where(x => x.Employee1ID == topPair.Employee1ID && x.Employee2ID == topPair.Employee2ID)
-                .OrderByDescending(x => x.DaysWorked)
-                .Select(x => new PairsViewModel
-                {
-                    Employee1ID = x.Employee1ID,
-                    Employee2ID = x.Employee2ID,
-                    ProjectID = x.ProjectID,
-                    DaysWorked = x.DaysWorked
-                })
-                .ToList();
-            }
-            return pairs;
-        }
-
     }
 }
