@@ -4,8 +4,7 @@ namespace SirmaTask.Services
 {
     public interface IDateParseService
     {
-        DateTime? ParseDate(string dateStr);
-        DateTime ParseNonNullDate(string dateStr);
+        bool ParseDate(string dateStr,out DateTime? date);
     }
     public class DateParseService : IDateParseService
     {
@@ -15,41 +14,26 @@ namespace SirmaTask.Services
             "MMM dd, yyyy", "yyyyMMdd", "dd.MM.yyyy",
             "yyyy.MM.dd", "dddd, dd MMMM yyyy"
         };
-        public DateTime? ParseDate(string dateStr)
+        public bool ParseDate(string dateStr,out DateTime? date)
         {
-            if (string.Equals(dateStr, "NULL", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(dateStr))
+            date = null;
+            if (string.Equals(dateStr, "NULL", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(dateStr))
             {
-                return null;
+                return false;
             }
-            DateTime parsedDate;
 
-            bool success = DateTime.TryParseExact(
+            if(DateTime.TryParseExact(
                         dateStr,
                         dateFormats,
                         CultureInfo.InvariantCulture,
                         DateTimeStyles.None,
-                        out parsedDate
-                        );
-
-            if(success)
-                return parsedDate;
-            throw new FormatException($"Invalid date format: {dateStr}");
-        }
-        public DateTime ParseNonNullDate(string dateStr)
-        {
-            DateTime parsedDate;
-
-            bool success = DateTime.TryParseExact(
-                        dateStr,
-                        dateFormats,
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.None,
-                        out parsedDate
-                        );
-
-            if (success)
-                return parsedDate;
-            throw new FormatException($"Invalid date format: {dateStr}");
+                        out DateTime parsedDate
+                        ))
+            {
+                date = parsedDate;
+                return true;
+            }
+            return false;
         }
     }
 }

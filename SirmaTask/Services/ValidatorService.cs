@@ -25,6 +25,7 @@ namespace SirmaTask.Services
             else if (!fileModel.CSVTable.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             {
                 ctrl.ModelState.AddModelError("CSVTable", "Only CSV files are allowed.");
+                return false;
             }
             return true;
         }
