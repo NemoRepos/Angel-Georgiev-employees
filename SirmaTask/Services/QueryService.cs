@@ -108,7 +108,7 @@ namespace SirmaTask.Services
                 where e1.EmployeeID < e2.EmployeeID
                 let overlapStart = e1.DateFrom > e2.DateFrom ? e1.DateFrom : e2.DateFrom
                 let overlapEnd = e1.DateTo < e2.DateTo ? e1.DateTo : e2.DateTo
-                let daysWorked = (overlapEnd - overlapStart).TotalDays
+                let daysWorked = (overlapEnd - overlapStart).TotalDays + 1
                 where daysWorked > 0
                 select new PairsViewModel
                 {
